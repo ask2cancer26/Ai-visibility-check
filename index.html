@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Would AI recommend you, or your competitor? — Spurwise</title>
+<meta name="description" content="Check your Google Business Profile against local competitors in seconds — then see what ChatGPT and Gemini actually say about you. Free check from Spurwise.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#FAF8F4;
+    --paper-raised:#FFFFFF;
+    --ink:#15171C;
+    --ink-soft:#5B5A54;
+    --gold:#B68A35;
+    --gold-soft:#E8DCC1;
+    --green:#1F6F5C;
+    --green-bg:#EAF2EE;
+    --amber:#9A6B1E;
+    --amber-bg:#F6EFE2;
+    --rust:#A13B2E;
+    --rust-bg:#F5EAE7;
+    --line:#E4DFD3;
+    --line-strong:#D6D0C1;
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Instrument Sans', system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  a{color:inherit;}
+  .wrap{max-width:640px;margin:0 auto;padding:0 20px;}
+
+  /* ---------- Header ---------- */
+  header.top{padding:22px 0 0;}
+  .brand{
+    display:flex;align-items:center;gap:8px;
+    font-family:'Fraunces', serif;font-weight:600;font-size:1.05rem;
+    letter-spacing:0.01em;text-decoration:none;color:var(--ink);
+  }
+  .brand-mark{width:9px;height:9px;border-radius:50%;background:var(--gold);display:inline-block;}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:48px 0 8px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;font-size:0.72rem;
+    letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 16px;
+  }
+  h1{
+    font-family:'Fraunces', serif;font-weight:500;font-size:2.1rem;
+    line-height:1.15;letter-spacing:-0.01em;margin:0 0 14px;
+  }
+  h1 em{font-style:italic;font-weight:600;color:var(--gold);}
+  .sub{font-size:1.02rem;color:var(--ink-soft);max-width:480px;margin:0;}
+
+  /* ---------- Form card ---------- */
+  .card{
+    background:var(--paper-raised);border:1px solid var(--line);
+    border-radius:var(--radius);padding:28px;margin-top:32px;
+    box-shadow:0 1px 2px rgba(21,23,28,0.03);
+  }
+  .field{margin-bottom:16px;}
+  .field:last-of-type{margin-bottom:0;}
+  label{display:block;font-size:0.8rem;font-weight:600;color:var(--ink);margin-bottom:6px;}
+  label .hint{font-weight:400;color:var(--ink-soft);}
+  input, select{
+    width:100%;font-family:'Instrument Sans', sans-serif;font-size:1rem;
+    padding:12px 14px;border:1px solid var(--line-strong);border-radius:9px;
+    background:var(--paper);color:var(--ink);appearance:none;
+  }
+  input::placeholder{color:#A6A296;}
+  input:focus, select:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+  select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235B5A54' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;
+  }
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  button.submit{
+    width:100%;margin-top:20px;padding:14px 18px;font-family:'Instrument Sans', sans-serif;
+    font-size:1rem;font-weight:600;color:#fff;background:var(--ink);border:none;
+    border-radius:9px;cursor:pointer;transition:background 0.15s ease;
+  }
+  button.submit:hover{background:#000;}
+  button.submit:disabled{background:#8b8a85;cursor:default;}
+  .microcopy{font-size:0.78rem;color:var(--ink-soft);text-align:center;margin-top:12px;}
+
+  /* ---------- Loading ---------- */
+  .loading{
+    display:none;align-items:center;gap:10px;font-family:'IBM Plex Mono', monospace;
+    font-size:0.85rem;color:var(--ink-soft);padding:6px 2px;
+  }
+  .loading.active{display:flex;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 1.1s ease-in-out infinite;}
+  .dot:nth-child(2){animation-delay:0.15s;}
+  .dot:nth-child(3){animation-delay:0.3s;}
+  @keyframes pulse{0%,100%{opacity:0.25;transform:scale(0.85);}50%{opacity:1;transform:scale(1);}}
+
+  /* ---------- Stage label ---------- */
+  .stage-label{
+    display:flex;align-items:center;gap:8px;margin:30px 0 10px;
+  }
+  .stage-label .tag{
+    font-family:'IBM Plex Mono', monospace;font-size:0.68rem;letter-spacing:0.06em;
+    text-transform:uppercase;color:#fff;background:var(--ink);
+    padding:3px 8px;border-radius:5px;
+  }
+  .stage-label .tag.live{background:var(--green);}
+  .stage-label .desc{font-size:0.82rem;color:var(--ink-soft);}
+
+  /* ---------- Ticket (shared look for both stages) ---------- */
+  .ticket{
+    display:none;margin-top:8px;background:var(--ink);border-radius:var(--radius);
+    padding:22px 22px 18px;color:#F4F1EA;font-family:'IBM Plex Mono', monospace;
+  }
+  .ticket.active{display:block;animation:rise 0.4s ease both;}
+  @keyframes rise{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .ticket-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1px dashed rgba(244,241,234,0.25);padding-bottom:12px;margin-bottom:14px;
+  }
+  .ticket-title{font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(244,241,234,0.6);}
+  .ticket-id{font-size:0.72rem;color:rgba(244,241,234,0.4);}
+
+  /* GBP comparison rows (Stage 1) */
+  .compare-row{
+    display:grid;grid-template-columns:1.4fr 0.9fr 0.9fr;gap:8px;
+    align-items:center;padding:9px 0;border-bottom:1px solid rgba(244,241,234,0.08);
+    font-size:0.86rem;
+  }
+  .compare-row:last-child{border-bottom:none;}
+  .compare-row.head{
+    font-size:0.68rem;letter-spacing:0.05em;text-transform:uppercase;
+    color:rgba(244,241,234,0.45);padding-bottom:10px;
+  }
+  .compare-row .who{color:#fff;}
+  .compare-row .you{color:var(--gold-soft);font-weight:500;}
+  .metric-gap{color:#E3A091;}
+  .metric-ok{color:#9FD6C2;}
+
+  /* AI engine result rows (Stage 2) */
+  .query-line{margin-bottom:14px;}
+  .query-line:last-of-type{margin-bottom:0;}
+  .query-text{font-size:0.82rem;color:rgba(244,241,234,0.55);margin-bottom:6px;}
+  .query-text::before{content:"\201C";}
+  .query-text::after{content:"\201D";}
+  .result-row{
+    display:flex;align-items:center;gap:10px;font-size:0.92rem;
+    padding:8px 10px;border-radius:7px;margin-bottom:5px;
+  }
+  .result-row:last-child{margin-bottom:0;}
+  .result-row.yes{background:rgba(31,111,92,0.18);}
+  .result-row.no{background:rgba(161,59,46,0.18);}
+  .glyph{
+    width:18px;height:18px;border-radius:50%;display:inline-flex;
+    align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;
+  }
+  .yes .glyph{background:#2D8B73;color:#fff;}
+  .no .glyph{background:#BD4C3C;color:#fff;}
+  .who{flex:1;}
+  .who b{font-weight:500;color:#fff;}
+
+  .ticket-foot{
+    margin-top:16px;padding-top:14px;border-top:1px dashed rgba(244,241,234,0.25);
+    font-size:0.78rem;color:rgba(244,241,234,0.55);line-height:1.6;
+  }
+
+  /* ---------- Bridge between stages ---------- */
+  .bridge{
+    display:none;margin-top:18px;background:var(--amber-bg);border:1px solid #E8D9B8;
+    border-radius:11px;padding:16px 18px;font-size:0.88rem;color:var(--ink);
+  }
+  .bridge.active{display:block;animation:rise 0.4s ease both;}
+  .bridge strong{color:var(--amber);}
+
+  /* ---------- Follow-up capture ---------- */
+  .followup{display:none;margin-top:18px;}
+  .followup.active{display:block;animation:rise 0.4s ease both;}
+  .followup .card{margin-top:0;}
+  .followup-title{font-family:'Fraunces', serif;font-weight:500;font-size:1.2rem;margin:0 0 6px;}
+  .followup-sub{font-size:0.9rem;color:var(--ink-soft);margin:0 0 18px;}
+
+  .confirm{display:none;text-align:center;padding:30px 20px;}
+  .confirm.active{display:block;animation:rise 0.4s ease both;}
+  .confirm .check{
+    width:44px;height:44px;border-radius:50%;background:var(--green-bg);color:var(--green);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.2rem;
+  }
+  .confirm h3{font-family:'Fraunces', serif;font-weight:500;font-size:1.15rem;margin:0 0 8px;}
+  .confirm p{font-size:0.92rem;color:var(--ink-soft);margin:0;}
+
+  /* ---------- Trust strip ---------- */
+  .trust{display:flex;gap:22px;margin-top:28px;padding-top:20px;border-top:1px solid var(--line);flex-wrap:wrap;}
+  .trust-item{font-size:0.8rem;color:var(--ink-soft);display:flex;align-items:center;gap:7px;}
+  .trust-item .mark{color:var(--gold);font-size:0.9rem;}
+
+  /* ---------- Context section ---------- */
+  .context{margin-top:56px;}
+  .context h2{font-family:'Fraunces', serif;font-weight:500;font-size:1.5rem;margin:0 0 14px;line-height:1.25;}
+  .context p{color:var(--ink-soft);font-size:0.96rem;margin:0 0 14px;}
+  .context p:last-child{margin-bottom:0;}
+  .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px;}
+  .why-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:11px;padding:18px;}
+  .why-card .num{font-family:'IBM Plex Mono', monospace;font-size:0.72rem;color:var(--gold);margin-bottom:8px;display:block;}
+  .why-card p{font-size:0.86rem;color:var(--ink);margin:0;}
+  .why-card .source{display:block;margin-top:6px;font-size:0.74rem;color:var(--ink-soft);}
+
+  /* ---------- Footer ---------- */
+  footer{
+    margin-top:60px;padding:24px 0 40px;border-top:1px solid var(--line);
+    font-size:0.8rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  }
+  footer a{text-decoration:none;color:var(--ink-soft);}
+  footer a:hover{color:var(--ink);}
+
+  @media (max-width:480px){
+    h1{font-size:1.7rem;}
+    .row2{grid-template-columns:1fr;}
+    .why-grid{grid-template-columns:1fr;}
+    .card{padding:22px 18px;}
+    .compare-row{grid-template-columns:1.2fr 0.8fr 0.8fr;font-size:0.78rem;}
+    footer{flex-direction:column;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ticket.active, .followup.active, .bridge.active, .confirm.active{animation:none;}
+    .dot{animation:none;opacity:1;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="top">
+    <a href="https://spurwise.co.uk" class="brand"><span class="brand-mark"></span> Spurwise</a>
+  </header>
+
+  <section class="hero">
+    <p class="eyebrow">AI Visibility Check · free</p>
+    <h1>Would AI send your next customer to <em>you</em> — or your competitor?</h1>
+    <p class="sub">We'll pull your real Google Business Profile against two local competitors right now — then show you what ChatGPT and Gemini actually say about you.</p>
+  </section>
+
+  <!-- FORM -->
+  <form class="card" id="checkForm">
+    <div class="field">
+      <label for="bizName">Business name</label>
+      <input type="text" id="bizName" placeholder="e.g. Morgan Richards Garage" required>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="trade">Trade <span class="hint">— pick closest</span></label>
+        <select id="trade" required>
+          <option value="" disabled selected>Choose one</option>
+          <option>Garage / MOT</option>
+          <option>Hair & beauty salon</option>
+          <option>Aesthetics clinic</option>
+          <option>Dental practice</option>
+          <option>Plumber / electrician</option>
+          <option>Restaurant / café</option>
+          <option>Letting agent</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="area">Area</label>
+        <input type="text" id="area" placeholder="e.g. Welling" required>
+      </div>
+    </div>
+
+    <button type="submit" class="submit" id="submitBtn">Check my Google profile →</button>
+    <p class="microcopy">Takes about 15 seconds. No card, no signup.</p>
+  </form>
+
+  <!-- LOADING (Stage 1) -->
+  <div class="loading" id="loadingState1">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    <span id="loadingText1">Looking up your Google Business Profile…</span>
+  </div>
+
+  <!-- STAGE 1: LIVE GBP COMPARISON -->
+  <div class="stage-label" id="stage1Label" style="display:none;">
+    <span class="tag live">Live</span>
+    <span class="desc">Pulled from Google just now</span>
+  </div>
+  <div class="ticket" id="gbpTicket">
+    <div class="ticket-head">
+      <span class="ticket-title">Google profile comparison</span>
+      <span class="ticket-id" id="ticketId1">#0000</span>
+    </div>
+    <div class="compare-row head">
+      <span>Business</span><span>Reviews</span><span>Photos</span>
+    </div>
+    <div id="gbpRows"><!-- rows injected --></div>
+    <div class="ticket-foot" id="gbpFoot">This is what your Google Business Profile looks like today, compared with nearby competitors in the same trade.</div>
+  </div>
+
+  <!-- BRIDGE to stage 2 -->
+  <div class="bridge" id="bridgeBlock">
+    <strong>Your Google profile is what AI reads first.</strong> Want to know what ChatGPT and Gemini actually say when someone searches for a "<span id="bridgeTrade"></span>" near <span id="bridgeArea"></span>? That needs a closer look — we check it by hand so it's accurate.
+  </div>
+
+  <!-- LOADING (Stage 2, after gate) -->
+  <div class="loading" id="loadingState2">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    <span>Queuing your AI search check…</span>
+  </div>
+
+  <!-- FOLLOW UP CAPTURE (gates stage 2) -->
+  <div class="followup" id="followupBlock">
+    <div class="card">
+      <p class="followup-title">Get your full AI visibility reading</p>
+      <p class="followup-sub">We'll check ChatGPT, Gemini and Perplexity by hand and send you the real picture — plus what's worth fixing first — within the hour.</p>
+      <div class="field">
+        <label for="contact">WhatsApp number or email</label>
+        <input type="text" id="contact" placeholder="07404 455181 or you@business.co.uk">
+      </div>
+      <button type="submit" class="submit" id="followupBtn" form="followupForm">Send me my full reading →</button>
+      <p class="microcopy">Free. No obligation. We don't share your number with anyone.</p>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION -->
+  <div class="confirm" id="confirmBlock">
+    <div class="check">✓</div>
+    <h3>On it.</h3>
+    <p>We're checking your business by hand right now. Expect a WhatsApp or email from the Spurwise team within the hour.</p>
+  </div>
+
+  <div class="trust" id="trustStrip">
+    <span class="trust-item"><span class="mark">●</span> Based in Abbey Wood, SE London</span>
+    <span class="trust-item"><span class="mark">●</span> AI checks verified by a person, not just a script</span>
+    <span class="trust-item"><span class="mark">●</span> No card required</span>
+  </div>
+
+  <section class="context">
+    <h2>Why this matters more than it did a year ago</h2>
+    <p>Search is changing. People don't just type "garage near me" into Google anymore — they're asking ChatGPT, Gemini and Perplexity directly, and trusting whatever name comes back first.</p>
+    <p>Those engines lean heavily on the same signals as your Google profile: reviews, photos, categories, consistency. A thin profile doesn't just hurt your Google ranking — it makes AI less confident recommending you at all.</p>
+
+    <div class="why-grid">
+      <div class="why-card">
+        <span class="num">01</span>
+        <p>Most local businesses' Google Business Profiles are missing details in ways that make AI engines less confident recommending them.</p>
+        <span class="source">Industry research, 2025–26</span>
+      </div>
+      <div class="why-card">
+        <span class="num">02</span>
+        <p>76% of people who search "near me" visit a business within 24 hours — AI-driven answers are increasingly where that search starts.</p>
+        <span class="source">Google / Think with Google</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Spurwise · Abbey Wood, SE London</span>
+    <a href="https://spurwise.co.uk">spurwise.co.uk</a>
+  </footer>
+
+</div>
+
+<form id="followupForm" style="display:none"></form>
+
+<script>
+(function(){
+  const checkForm = document.getElementById('checkForm');
+  const loadingState1 = document.getElementById('loadingState1');
+  const loadingText1 = document.getElementById('loadingText1');
+  const stage1Label = document.getElementById('stage1Label');
+  const gbpTicket = document.getElementById('gbpTicket');
+  const gbpRows = document.getElementById('gbpRows');
+  const gbpFoot = document.getElementById('gbpFoot');
+  const ticketId1 = document.getElementById('ticketId1');
+  const bridgeBlock = document.getElementById('bridgeBlock');
+  const bridgeTrade = document.getElementById('bridgeTrade');
+  const bridgeArea = document.getElementById('bridgeArea');
+  const loadingState2 = document.getElementById('loadingState2');
+  const followupBlock = document.getElementById('followupBlock');
+  const followupForm = document.getElementById('followupForm');
+  const confirmBlock = document.getElementById('confirmBlock');
+  const trustStrip = document.getElementById('trustStrip');
+  const submitBtn = document.getElementById('submitBtn');
+
+  let lastLead = null; // {bizName, trade, area}
+
+  function escapeHtml(str){
+    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ----------------------------------------------------------------
+  // STAGE 1 — REAL LIVE LOOKUP
+  //
+  // Replace fetchGbpComparison() with a real call to your own backend
+  // endpoint (e.g. a Cloudflare Pages function) that:
+  //   1. Calls Google Places API "Find Place" for {bizName + area} to
+  //      get a place_id, then "Place Details" for rating, review
+  //      count, photo count, categories.
+  //   2. Calls "Nearby Search" / Text Search for the same trade + area
+  //      to get 2 comparable competitors, then Place Details on each.
+  //   3. Returns JSON: { you: {...}, competitors: [{...}, {...}] }
+  // This must NEVER fabricate data — if the business can't be found,
+  // say so plainly (see the "not found" branch below) rather than
+  // inventing numbers.
+  // ----------------------------------------------------------------
+  async function fetchGbpComparison(bizName, trade, area){
+    const res = await fetch('/api/gbp-check', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ bizName, trade, area })
+    });
+    if(!res.ok) throw new Error('lookup failed');
+    return res.json();
+    // Expected shape:
+    // {
+    //   found: true,
+    //   you: { name, reviewCount, photoCount, rating },
+    //   competitors: [
+    //     { name, reviewCount, photoCount, rating },
+    //     { name, reviewCount, photoCount, rating }
+    //   ]
+    // }
+  }
+
+  checkForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    const bizName = document.getElementById('bizName').value.trim();
+    const trade = document.getElementById('trade').value;
+    const area = document.getElementById('area').value.trim();
+    if(!bizName || !trade || !area) return;
+
+    lastLead = { bizName, trade, area };
+
+    // reset
+    gbpTicket.classList.remove('active');
+    bridgeBlock.classList.remove('active');
+    followupBlock.classList.remove('active');
+    confirmBlock.classList.remove('active');
+    stage1Label.style.display = 'none';
+    trustStrip.style.display = 'flex';
+
+    submitBtn.disabled = true;
+    checkForm.style.display = 'none';
+    loadingState1.classList.add('active');
+
+    const steps = [
+      'Looking up your Google Business Profile…',
+      'Finding nearby ' + trade.toLowerCase() + ' competitors in ' + area + '…',
+      'Comparing reviews and photos…'
+    ];
+    let i = 0;
+    loadingText1.textContent = steps[0];
+    const stepTimer = setInterval(() => {
+      i++;
+      if(i < steps.length) loadingText1.textContent = steps[i];
+    }, 650);
+
+    try{
+      const data = await fetchGbpComparison(bizName, trade, area);
+      clearInterval(stepTimer);
+      loadingState1.classList.remove('active');
+      renderGbpTicket(data, bizName, trade, area);
+    }catch(err){
+      clearInterval(stepTimer);
+      loadingState1.classList.remove('active');
+      renderGbpNotFound(bizName);
+    }
+  });
+
+  function metricCell(value, isYou, betterThanAvg){
+    const cls = isYou ? (betterThanAvg ? 'metric-ok' : 'metric-gap') : '';
+    return '<span class="' + cls + '">' + value + '</span>';
+  }
+
+  function renderGbpTicket(data, bizName, trade, area){
+    ticketId1.textContent = '#' + Math.floor(1000 + Math.random()*8999);
+
+    if(!data.found){
+      renderGbpNotFound(bizName);
+      return;
+    }
+
+    const you = data.you;
+    const competitors = data.competitors || [];
+    const avgReviews = competitors.length
+      ? Math.round(competitors.reduce((s,c)=>s+c.reviewCount,0) / competitors.length)
+      : you.reviewCount;
+    const avgPhotos = competitors.length
+      ? Math.round(competitors.reduce((s,c)=>s+c.photoCount,0) / competitors.length)
+      : you.photoCount;
+
+    let html = '';
+    html += '<div class="compare-row">';
+    html += '<span class="who you">' + escapeHtml(you.name) + ' (you)</span>';
+    html += '<span>' + metricCell(you.reviewCount, true, you.reviewCount >= avgReviews) + '</span>';
+    html += '<span>' + metricCell(you.photoCount, true, you.photoCount >= avgPhotos) + '</span>';
+    html += '</div>';
+
+    competitors.forEach(c => {
+      html += '<div class="compare-row">';
+      html += '<span class="who">' + escapeHtml(c.name) + '</span>';
+      html += '<span>' + c.reviewCount + '</span>';
+      html += '<span>' + c.photoCount + '</span>';
+      html += '</div>';
+    });
+    gbpRows.innerHTML = html;
+
+    const behindReviews = you.reviewCount < avgReviews;
+    const behindPhotos = you.photoCount < avgPhotos;
+    if(behindReviews || behindPhotos){
+      gbpFoot.textContent = 'Your profile has fewer ' +
+        [behindReviews ? 'reviews' : null, behindPhotos ? 'photos' : null].filter(Boolean).join(' and ') +
+        ' than the local average — that gap is part of what AI engines weigh when deciding who to recommend.';
+    }else{
+      gbpFoot.textContent = 'Your Google profile holds up well against local competitors on these basics — a good sign, though it isn\'t the full picture.';
+    }
+
+    stage1Label.style.display = 'flex';
+    gbpTicket.classList.add('active');
+
+    setTimeout(() => {
+      bridgeTrade.textContent = trade.toLowerCase();
+      bridgeArea.textContent = area;
+      bridgeBlock.classList.add('active');
+      setTimeout(() => followupBlock.classList.add('active'), 250);
+    }, 350);
+  }
+
+  function renderGbpNotFound(bizName){
+    ticketId1.textContent = '#----';
+    gbpRows.innerHTML = '<div class="compare-row"><span class="who">' + escapeHtml(bizName) + '</span><span>—</span><span>—</span></div>';
+    gbpFoot.textContent = 'We couldn\'t find a Google Business Profile for this name and area — that on its own is worth knowing, since it means AI engines have nothing to read about you at all.';
+    stage1Label.style.display = 'flex';
+    gbpTicket.classList.add('active');
+    setTimeout(() => {
+      bridgeTrade.textContent = (lastLead && lastLead.trade ? lastLead.trade.toLowerCase() : 'business');
+      bridgeArea.textContent = lastLead ? lastLead.area : 'your area';
+      bridgeBlock.classList.add('active');
+      setTimeout(() => followupBlock.classList.add('active'), 250);
+    }, 350);
+  }
+
+  // ----------------------------------------------------------------
+  // STAGE 2 — GATED, HUMAN-VERIFIED
+  //
+  // On submit, this should POST { ...lastLead, contact } to your
+  // Make.com webhook (see scenario notes). It does NOT render an AI
+  // engine result on this page — that result is checked by hand and
+  // sent directly to the prospect via WhatsApp/email, per the
+  // verification process. Showing a live "AI says X" result here
+  // would mean showing an unverified claim to the public.
+  // ----------------------------------------------------------------
+  followupForm.addEventListener('submit', handleFollowup);
+  document.getElementById('followupBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    handleFollowup(e);
+  });
+
+  async function handleFollowup(e){
+    e.preventDefault();
+    const contact = document.getElementById('contact').value.trim();
+    if(!contact){
+      document.getElementById('contact').focus();
+      return;
+    }
+
+    followupBlock.classList.remove('active');
+    loadingState2.classList.add('active');
+
+    try{
+      await fetch('/api/visibility-lead', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ ...lastLead, contact, timestamp: new Date().toISOString() })
+      });
+    }catch(err){
+      // Fail quietly on the front end — the lead capture failing
+      // shouldn't block the confirmation; log server-side for retry.
+    }
+
+    setTimeout(() => {
+      loadingState2.classList.remove('active');
+      gbpTicket.classList.remove('active');
+      bridgeBlock.classList.remove('active');
+      trustStrip.style.display = 'none';
+      confirmBlock.classList.add('active');
+    }, 600);
+  }
+})();
+</script>
+
+</body>
+</html>
